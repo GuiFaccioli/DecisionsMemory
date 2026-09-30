@@ -8,5 +8,6 @@
 6. [Queue ambiguous deduplication for review](0006-queue-ambiguous-deduplication-for-review.md)
 7. [Generate a consolidated HTML view](0007-generate-a-consolidated-html-view.md)
 8. [Use hybrid deduplication](0008-use-hybrid-deduplication.md)
+9. [Record revisions as explicit transitions](0009-record-revisions-as-explicit-transitions.md)
 
 These decisions describe approved design direction. They do not constitute an implementation plan.
