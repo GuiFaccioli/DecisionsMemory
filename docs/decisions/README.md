@@ -10,5 +10,6 @@
 8. [Use hybrid deduplication](0008-use-hybrid-deduplication.md)
 9. [Record revisions as explicit transitions](0009-record-revisions-as-explicit-transitions.md)
 10. [Represent initial creation as a transition](0010-represent-initial-creation-as-a-transition.md)
+11. [Use minimal YAML frontmatter](0011-use-minimal-yaml-frontmatter.md)
 
 These decisions describe approved design direction. They do not constitute an implementation plan.
