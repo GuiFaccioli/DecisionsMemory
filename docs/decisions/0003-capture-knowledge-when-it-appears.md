@@ -4,7 +4,7 @@
 
 ## Decision
 
-DecisionMemory captures knowledge when the LLM identifies a relevant event during work. It does not wait for a turn or session to end.
+DecisionsMemory captures knowledge when the LLM identifies a relevant event during work. It does not wait for a turn or session to end.
 
 The workflow has three responsibilities:
 
@@ -24,4 +24,3 @@ Important knowledge should already be persisted when a session closes. Session-e
 - Codex, Claude Code, and Copilot share the semantic workflow.
 - Hooks remain environment-specific adapters and are added only where they improve reliability.
 - The design does not promise zero data loss between recognition and persistence.
-

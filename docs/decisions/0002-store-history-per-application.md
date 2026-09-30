@@ -4,10 +4,10 @@
 
 ## Decision
 
-DecisionMemory data belongs to the application repository being worked on. The approved repository-local location is:
+DecisionsMemory data belongs to the application repository being worked on. The approved repository-local location is:
 
 ```text
-docs/decision-memory/
+docs/decisions-memory/
   entries/
   pending-review/
   index.md
@@ -15,7 +15,7 @@ docs/decision-memory/
   site/
 ```
 
-The reusable workflow may be installed under `.agents/skills/decision-memory/` or another supported shared scope, but it must never merge histories from different applications.
+The reusable workflow may be installed under `.agents/skills/decisions-memory/` or another supported shared scope, but it must never merge histories from different applications.
 
 ## Rationale
 
@@ -24,6 +24,5 @@ Developers need to find an application's decisions and technical evolution where
 ## Consequences
 
 - Markdown is the canonical, versioned project history.
-- The same DecisionMemory skill can serve multiple repositories safely.
+- The same DecisionsMemory skill can serve multiple repositories safely.
 - `site/` is a derived, readable view of repository-local knowledge.
-
