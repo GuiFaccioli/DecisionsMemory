@@ -22,5 +22,4 @@ The project requires a real, visually legible sequence of technical evolution. A
 
 - Markdown and the generated HTML show the same `Before → Change → After` progression.
 - The current state is the `After` value from the latest revision.
-- Initial creation is represented as a transition from an empty state to the first state.
-- The exact frontmatter and heading layout remain to be decided; this decision fixes the revision semantics, not presentation syntax.
+- The exact representation of initial creation, frontmatter, and heading layout remains to be decided; this decision fixes revision semantics, not presentation syntax.
