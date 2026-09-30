@@ -14,5 +14,6 @@
 12. [Organize history by relevant repository change](0012-organize-history-by-relevant-repository-change.md)
 13. [Record each relevant commit separately](0013-record-each-relevant-commit-separately.md)
 14. [Use dual-readable canonical Markdown](0014-use-dual-readable-canonical-markdown.md)
+15. [Capture immediately after relevant commits](0015-capture-immediately-after-relevant-commits.md)
 
 These decisions describe approved design direction. They do not constitute an implementation plan.
