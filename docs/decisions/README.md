@@ -12,5 +12,6 @@
 10. [Represent initial creation as a transition](0010-represent-initial-creation-as-a-transition.md)
 11. [Use minimal YAML frontmatter](0011-use-minimal-yaml-frontmatter.md)
 12. [Organize history by relevant repository change](0012-organize-history-by-relevant-repository-change.md)
+13. [Record each relevant commit separately](0013-record-each-relevant-commit-separately.md)
 
 These decisions describe approved design direction. They do not constitute an implementation plan.
