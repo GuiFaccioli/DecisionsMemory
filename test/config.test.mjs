@@ -4,7 +4,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import test from 'node:test';
 
-import { loadConfig } from '../src/config.js';
+import { isPathInside, loadConfig } from '../src/config.js';
 
 test('loadConfig supplies the safe V1 defaults when no file exists', async () => {
   const repositoryRoot = await mkdtemp(join(tmpdir(), 'decisionsmemory-config-'));
@@ -65,4 +65,8 @@ test('loadConfig rejects a Journal path traversing a symlink', async () => {
   await writeFile(join(repositoryRoot, 'decisionsmemory.json'), JSON.stringify({ journalDirectory: 'linked/journal' }));
 
   await assert.rejects(loadConfig(repositoryRoot), /must not traverse a symlink/);
+});
+
+test('isPathInside rejects a path on another Windows drive', () => {
+  assert.equal(isPathInside('C:\\repo', 'D:\\outside'), false);
 });

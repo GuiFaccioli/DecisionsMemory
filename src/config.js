@@ -1,5 +1,5 @@
 import { readFile, realpath } from 'node:fs/promises';
-import { isAbsolute, relative, resolve } from 'node:path';
+import { isAbsolute, relative, resolve, win32 } from 'node:path';
 
 const defaults = {
   executor: {
@@ -9,6 +9,12 @@ const defaults = {
   },
   journalDirectory: 'docs/dev-journal',
 };
+
+export function isPathInside(root, candidate) {
+  const path = /^[A-Za-z]:[\\/]/.test(root) || /^[A-Za-z]:[\\/]/.test(candidate) ? win32 : { isAbsolute, relative, sep: '/' };
+  const pathRelative = path.relative(root, candidate);
+  return pathRelative === '' || (!path.isAbsolute(pathRelative) && pathRelative !== '..' && !pathRelative.startsWith(`..${path.sep}`));
+}
 
 export async function loadConfig(repositoryRoot) {
   let configured = {};
@@ -32,7 +38,7 @@ export async function loadConfig(repositoryRoot) {
   }
 
   const journalPath = resolve(repositoryRoot, config.journalDirectory);
-  if (isAbsolute(config.journalDirectory) || relative(repositoryRoot, journalPath).startsWith('..')) {
+  if (isAbsolute(config.journalDirectory) || !isPathInside(repositoryRoot, journalPath)) {
     throw new Error('journalDirectory must stay inside the repository');
   }
   const realRoot = await realpath(repositoryRoot);
@@ -41,7 +47,7 @@ export async function loadConfig(repositoryRoot) {
     ancestor = resolve(ancestor, segment);
     try {
       const resolvedAncestor = await realpath(ancestor);
-      if (relative(realRoot, resolvedAncestor).startsWith('..')) {
+      if (!isPathInside(realRoot, resolvedAncestor)) {
         throw new Error('journalDirectory must not traverse a symlink');
       }
     } catch (error) {
