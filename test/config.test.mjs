@@ -47,3 +47,13 @@ test('loadConfig rejects an empty executor command', async () => {
 
   await assert.rejects(loadConfig(repositoryRoot), /executor.command is required/);
 });
+
+test('loadConfig rejects shell syntax in executor settings', async () => {
+  const repositoryRoot = await mkdtemp(join(tmpdir(), 'decisionsmemory-config-'));
+  await writeFile(
+    join(repositoryRoot, 'decisionsmemory.json'),
+    JSON.stringify({ executor: { command: 'codex & evil', model: 'model;evil' } }),
+  );
+
+  await assert.rejects(loadConfig(repositoryRoot), /safe executable token/);
+});

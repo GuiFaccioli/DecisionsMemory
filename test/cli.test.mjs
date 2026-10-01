@@ -18,3 +18,12 @@ test('status reports a non-Git workspace without mutating it', async () => {
   const { stdout } = await run(process.execPath, [cli, 'status'], { cwd: directory });
   assert.match(stdout, /Git repository: no/);
 });
+
+test('status reports configuration and hook state in a Git repository', async () => {
+  const directory = await mkdtemp(join(tmpdir(), 'decisionsmemory-cli-'));
+  await run('git', ['init', '-q'], { cwd: directory });
+  const { stdout } = await run(process.execPath, [cli, 'status'], { cwd: directory });
+  assert.match(stdout, /Git repository: yes/);
+  assert.match(stdout, /Configuration: valid/);
+  assert.match(stdout, /Hook: missing/);
+});

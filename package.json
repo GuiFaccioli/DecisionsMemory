@@ -1,7 +1,6 @@
 {
   "name": "decisionsmemory",
   "version": "0.1.0",
-  "private": true,
   "type": "module",
   "engines": { "node": ">=20" },
   "bin": { "decisionsmemory": "bin/decisionsmemory.js" },

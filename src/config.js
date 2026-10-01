@@ -25,6 +25,11 @@ export async function loadConfig(repositoryRoot) {
   if (typeof config.executor.command !== 'string' || !config.executor.command.trim()) {
     throw new Error('executor.command is required');
   }
+  if (!/^[A-Za-z0-9._/-]+$/.test(config.executor.command)
+    || !/^[A-Za-z0-9._-]+$/.test(config.executor.model)
+    || !['low', 'medium', 'high'].includes(config.executor.reasoningEffort)) {
+    throw new Error('executor settings must use a safe executable token, model, and reasoning effort');
+  }
 
   const journalPath = resolve(repositoryRoot, config.journalDirectory);
   if (isAbsolute(config.journalDirectory) || relative(repositoryRoot, journalPath).startsWith('..')) {

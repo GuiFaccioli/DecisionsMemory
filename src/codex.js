@@ -1,8 +1,11 @@
 import { spawn } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
 
-function invoke(command, args, { cwd, input }) {
+const outputSchema = fileURLToPath(new URL('../schemas/capture-result.schema.json', import.meta.url));
+
+function invoke(command, args, { cwd, input, shell }) {
   return new Promise((resolve, reject) => {
-    const child = spawn(command, args, { cwd, stdio: ['pipe', 'pipe', 'pipe'] });
+    const child = spawn(command, args, { cwd, shell, stdio: ['pipe', 'pipe', 'pipe'] });
     let stdout = '';
     let stderr = '';
     child.stdout.on('data', (data) => { stdout += data; });
@@ -15,13 +18,22 @@ function invoke(command, args, { cwd, input }) {
 
 export async function runCodexCapture({ repositoryRoot, commit, config, commandRunner = invoke }) {
   const { command, model, reasoningEffort } = config.executor;
-  const args = ['exec', '--ephemeral', '--model', model, '-c', `model_reasoning_effort=${reasoningEffort}`, '-'];
+  const args = ['exec', '--ephemeral', '--model', model, '-c', `model_reasoning_effort=${reasoningEffort}`, '--output-schema', outputSchema, '-'];
   const output = await commandRunner(command, args, {
     cwd: repositoryRoot,
-    input: JSON.stringify({ task: 'Return JSON array of technical entries only.', commit }),
+    shell: process.platform === 'win32',
+    input: JSON.stringify({
+      task: 'Return only a JSON object with an entries array. Each entry must have non-empty string title, summary, impact, and files as an array of strings. Do not include raw diffs or credentials.',
+      commit,
+    }),
   });
-  const entries = JSON.parse(output);
-  if (!Array.isArray(entries) || entries.some((entry) => !entry.title || !entry.summary || !Array.isArray(entry.files) || !entry.impact)) {
+  const entries = JSON.parse(output).entries;
+  if (!Array.isArray(entries) || entries.some((entry) =>
+    typeof entry?.title !== 'string' || !entry.title.trim()
+    || typeof entry.summary !== 'string' || !entry.summary.trim()
+    || !Array.isArray(entry.files) || entry.files.some((file) => typeof file !== 'string')
+    || typeof entry.impact !== 'string' || !entry.impact.trim()
+  )) {
     throw new Error('executor returned invalid entries');
   }
   return entries;

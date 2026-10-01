@@ -20,7 +20,7 @@ test('writeJournalRecord creates numbered Markdown and visual files for a commit
     ],
   });
 
-  assert.match(result.directory, /2026-09-30-corrige-login$/);
+  assert.match(result.directory, /2026-09-30-corrige-login-abc1234$/);
   assert.match(await readFile(join(result.directory, 'entry1.md'), 'utf8'), /Valida sessão/);
   assert.match(await readFile(join(result.directory, 'entry2.md'), 'utf8'), /Mostra erro/);
   await stat(join(result.directory, 'index.html'));
@@ -35,4 +35,15 @@ test('writeJournalRecord continues entry numbers across commit folders', async (
   const result = await writeJournalRecord({ repositoryRoot, config, commit: { hash: 'two', subject: 'Segundo', date: '2026-10-01' }, entries: [{ title: 'Dois', summary: 's', files: [], impact: 'i' }] });
 
   await stat(join(result.directory, 'entry2.md'));
+  const index = await readFile(join(repositoryRoot, 'docs/dev-journal/index.md'), 'utf8');
+  assert.match(index, /Primeiro/);
+  assert.match(index, /Segundo/);
+});
+
+test('writeJournalRecord keeps same-day commits with the same subject in separate folders', async () => {
+  const repositoryRoot = await mkdtemp(join(tmpdir(), 'decisionsmemory-journal-'));
+  const first = await writeJournalRecord({ repositoryRoot, config, commit: { hash: 'aaaaaaa', subject: 'Ajuste', date: '2026-09-30' }, entries: [{ title: 'Um', summary: 's', files: [], impact: 'i' }] });
+  const second = await writeJournalRecord({ repositoryRoot, config, commit: { hash: 'bbbbbbb', subject: 'Ajuste', date: '2026-09-30' }, entries: [{ title: 'Dois', summary: 's', files: [], impact: 'i' }] });
+
+  assert.notEqual(first.directory, second.directory);
 });

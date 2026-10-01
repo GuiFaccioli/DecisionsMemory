@@ -7,6 +7,7 @@ import { promisify } from 'node:util';
 import test from 'node:test';
 
 import { captureHeadCommit } from '../src/capture.js';
+import { readHeadCommit } from '../src/git.js';
 
 const run = promisify(execFile);
 const config = { journalDirectory: 'docs/dev-journal' };
@@ -58,4 +59,16 @@ test('captureHeadCommit reports executor failure without writing records', async
   const result = await captureHeadCommit({ repositoryRoot, config, executor: async () => { throw new Error('offline'); } });
   assert.equal(result.status, 'warning');
   assert.match(result.message, /offline/);
+});
+
+test('readHeadCommit includes files from an initial commit', async () => {
+  const repositoryRoot = await mkdtemp(join(tmpdir(), 'decisionsmemory-capture-'));
+  await run('git', ['init', '-q'], { cwd: repositoryRoot });
+  await run('git', ['config', 'user.email', 'test@example.com'], { cwd: repositoryRoot });
+  await run('git', ['config', 'user.name', 'Test'], { cwd: repositoryRoot });
+  await writeFile(join(repositoryRoot, 'README.md'), 'initial');
+  await run('git', ['add', 'README.md'], { cwd: repositoryRoot });
+  await run('git', ['commit', '-m', 'Inicial'], { cwd: repositoryRoot });
+
+  assert.deepEqual((await readHeadCommit(repositoryRoot)).files, ['README.md']);
 });

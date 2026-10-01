@@ -23,7 +23,7 @@ export async function captureHeadCommit({ repositoryRoot, config, executor }) {
 export async function commitJournalFiles({ repositoryRoot, journal, sourceCommit }) {
   const paths = journal.generatedFiles.map((file) => relative(repositoryRoot, file));
   await git(repositoryRoot, ['add', '--', ...paths]);
-  await git(repositoryRoot, ['commit', '-m', `${generatedPrefix} record ${sourceCommit.hash.slice(0, 7)}`]);
+  await git(repositoryRoot, ['commit', '--only', '-m', `${generatedPrefix} record ${sourceCommit.hash.slice(0, 7)}`, '--', ...paths]);
 }
 
 export async function runPostCommit({ repositoryRoot, config, executor }) {
