@@ -16,5 +16,6 @@
 14. [Use dual-readable canonical Markdown](0014-use-dual-readable-canonical-markdown.md)
 15. [Capture immediately after relevant commits](0015-capture-immediately-after-relevant-commits.md)
 16. [Distribute as a public npm development tool](0016-distribute-as-a-public-npm-development-tool.md)
+17. [Use an explicit npx initializer](0017-use-an-explicit-npx-initializer.md)
 
 These decisions describe approved design direction. They do not constitute an implementation plan.
