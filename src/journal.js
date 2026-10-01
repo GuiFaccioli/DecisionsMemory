@@ -48,8 +48,12 @@ export async function writeJournalRecord({ repositoryRoot, config, commit, entri
   const newLink = `- [${commit.date} — ${commit.subject}](${rootLink})\n`;
   if (!existingIndex.includes(`](${rootLink})`)) existingIndex += newLink;
   await writeFile(markdownIndex, existingIndex);
-  const indexLinks = [...existingIndex.matchAll(/- \[([^\]]+)\]\(([^)]+)\)/g)]
-    .map(([, label, href]) => `<li><a href="${escapeHtml(href)}">${escapeHtml(label)}</a></li>`).join('');
-  await writeFile(join(journalRoot, 'index.html'), `<!doctype html><html><body><h1>Dev Journal</h1><ul>${indexLinks}</ul></body></html>`);
+  const htmlIndex = join(journalRoot, 'index.html');
+  let existingHtml = '<!doctype html><html><body><h1>Dev Journal</h1><ul></ul></body></html>';
+  try { existingHtml = await readFile(htmlIndex, 'utf8'); } catch (error) { if (error.code !== 'ENOENT') throw error; }
+  if (!existingHtml.includes(`href="${rootLink}"`)) {
+    existingHtml = existingHtml.replace('</ul>', `<li><a href="${escapeHtml(rootLink)}">${escapeHtml(`${commit.date} — ${commit.subject}`)}</a></li></ul>`);
+  }
+  await writeFile(htmlIndex, existingHtml);
   return { directory, generatedFiles: [...generated, join(directory, 'index.html'), join(directory, 'styles.css'), join(journalRoot, 'index.md'), join(journalRoot, 'index.html')] };
 }

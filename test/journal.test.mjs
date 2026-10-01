@@ -51,3 +51,11 @@ test('writeJournalRecord keeps same-day commits with the same subject in separat
 
   assert.notEqual(first.directory, second.directory);
 });
+
+test('global HTML index preserves commit subjects containing brackets', async () => {
+  const repositoryRoot = await mkdtemp(join(tmpdir(), 'decisionsmemory-journal-'));
+  await writeJournalRecord({ repositoryRoot, config, commit: { hash: 'aaaaaaa', subject: 'feat: add [admin]', date: '2026-09-30' }, entries: [{ title: 'Um', summary: 's', files: [], impact: 'i' }] });
+
+  const page = await readFile(join(repositoryRoot, 'docs/dev-journal/index.html'), 'utf8');
+  assert.match(page, /feat: add \[admin\]/);
+});
