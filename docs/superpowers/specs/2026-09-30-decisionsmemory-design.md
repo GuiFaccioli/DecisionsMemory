@@ -103,9 +103,9 @@ an `index.html` and `styles.css` for its visual view. The root `index.md` and
 
 ## History rewriting and hook coexistence
 
-For amended commits, rebases, and cherry-picks, DecisionsMemory creates new
-records and marks replaced records as superseded rather than editing history.
-This preserves an honest audit trail.
+Amended commits, rebases, and cherry-picks are recorded as ordinary new
+commits when they reach `post-commit`. V1 does not link them to older Journal
+entries and does not mark anything as superseded.
 
 The hook installation is idempotent: rerunning installation repairs the
 DecisionsMemory portion while retaining an existing hook chain.

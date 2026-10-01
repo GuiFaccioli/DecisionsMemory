@@ -18,6 +18,7 @@
 - Default executor: local Codex, `gpt-6-luna`, reasoning effort `low`.
 - Never persist full diffs, credentials, or API keys.
 - Generated documentation commits use `chore(decisionsmemory):` and are skipped by the hook.
+- Amendments, rebases, and cherry-picks are ordinary new commits; no supersession relationship is tracked.
 - Do not import prior history, retry failures, overwrite dirty Journal files, or replace an existing hook.
 
 ## Review Focus
