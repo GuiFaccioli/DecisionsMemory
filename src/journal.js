@@ -37,8 +37,9 @@ export async function writeJournalRecord({ repositoryRoot, config, commit, entri
     number += 1;
   }
   const links = generated.map((file) => `<li><a href="${escapeHtml(basename(file))}">${escapeHtml(basename(file))}</a></li>`).join('');
+  const cards = entries.map((entry, index) => `<article><h2>${escapeHtml(entry.title)}</h2><p>${escapeHtml(entry.summary)}</p><h3>Arquivos</h3><ul>${entry.files.map((file) => `<li><code>${escapeHtml(file)}</code></li>`).join('') || '<li>Nenhum</li>'}</ul><h3>Impacto</h3><p>${escapeHtml(entry.impact)}</p><a href="entry${number - entries.length + index}.md">Ver Markdown</a></article>`).join('');
   await writeFile(join(directory, 'styles.css'), 'body{font-family:system-ui;max-width:72ch;margin:3rem auto;padding:0 1rem}');
-  await writeFile(join(directory, 'index.html'), `<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="styles.css"><title>${escapeHtml(commit.subject)}</title></head><body><h1>${escapeHtml(commit.subject)}</h1><ul>${links}</ul></body></html>`);
+  await writeFile(join(directory, 'index.html'), `<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="styles.css"><title>${escapeHtml(commit.subject)}</title></head><body><h1>${escapeHtml(commit.subject)}</h1>${cards}<h2>Entradas</h2><ul>${links}</ul></body></html>`);
   await mkdir(journalRoot, { recursive: true });
   const rootLink = relative(journalRoot, join(directory, 'index.html')).replaceAll('\\', '/');
   const markdownIndex = join(journalRoot, 'index.md');

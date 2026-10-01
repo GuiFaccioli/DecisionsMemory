@@ -44,3 +44,22 @@ test('installHook preserves an existing hook and creates an idempotent wrapper',
   await run('git', ['commit', '--allow-empty', '-m', 'test'], { cwd: root, env: { ...process.env, RESULT: result } });
   assert.equal(await readFile(result, 'utf8'), 'original\njournal\n');
 });
+
+test('installed hook runs the real CLI and creates one Journal commit', async () => {
+  const root = await repository();
+  const fakeBin = await mkdtemp(join(tmpdir(), 'decisionsmemory-codex-'));
+  await writeFile(join(fakeBin, 'codex.cmd'), '@echo {"entries":[{"title":"Entrada","summary":"Resumo","files":[],"impact":"Impacto"}]}\r\n');
+  await run('git', ['config', 'user.email', 'test@example.com'], { cwd: root });
+  await run('git', ['config', 'user.name', 'Test'], { cwd: root });
+  await installHook({ repositoryRoot: root, packageRoot: process.cwd() });
+
+  await run('git', ['commit', '--allow-empty', '-m', 'Mudança real'], {
+    cwd: root,
+    env: { ...process.env, PATH: `${fakeBin};${process.env.PATH}` },
+  });
+
+  const { stdout: subjects } = await run('git', ['log', '--format=%s', '-2'], { cwd: root });
+  assert.match(subjects, /^chore\(decisionsmemory\):/m);
+  const { stdout: generated } = await run('git', ['show', '--format=', '--name-only', 'HEAD'], { cwd: root });
+  assert.match(generated, /docs\/dev-journal\/entries/);
+});

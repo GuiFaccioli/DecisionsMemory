@@ -23,6 +23,10 @@ test('writeJournalRecord creates numbered Markdown and visual files for a commit
   assert.match(result.directory, /2026-09-30-corrige-login-abc1234$/);
   assert.match(await readFile(join(result.directory, 'entry1.md'), 'utf8'), /Valida sessão/);
   assert.match(await readFile(join(result.directory, 'entry2.md'), 'utf8'), /Mostra erro/);
+  const page = await readFile(join(result.directory, 'index.html'), 'utf8');
+  assert.match(page, /Valida sessão/);
+  assert.match(page, /Rejeita sessão expirada/);
+  assert.match(page, /Evita acesso inválido/);
   await stat(join(result.directory, 'index.html'));
   await stat(join(result.directory, 'styles.css'));
   await stat(join(repositoryRoot, 'docs/dev-journal/index.md'));
