@@ -72,3 +72,24 @@ test('readHeadCommit includes files from an initial commit', async () => {
 
   assert.deepEqual((await readHeadCommit(repositoryRoot)).files, ['README.md']);
 });
+
+test('readHeadCommit includes files from a merge commit', async () => {
+  const repositoryRoot = await mkdtemp(join(tmpdir(), 'decisionsmemory-capture-'));
+  await run('git', ['init', '-q'], { cwd: repositoryRoot });
+  await run('git', ['config', 'user.email', 'test@example.com'], { cwd: repositoryRoot });
+  await run('git', ['config', 'user.name', 'Test'], { cwd: repositoryRoot });
+  await writeFile(join(repositoryRoot, 'base.txt'), 'base');
+  await run('git', ['add', '.'], { cwd: repositoryRoot });
+  await run('git', ['commit', '-m', 'Base'], { cwd: repositoryRoot });
+  await run('git', ['checkout', '-qb', 'feature'], { cwd: repositoryRoot });
+  await writeFile(join(repositoryRoot, 'feature.txt'), 'feature');
+  await run('git', ['add', '.'], { cwd: repositoryRoot });
+  await run('git', ['commit', '-m', 'Feature'], { cwd: repositoryRoot });
+  await run('git', ['checkout', '-q', 'master'], { cwd: repositoryRoot });
+  await writeFile(join(repositoryRoot, 'main.txt'), 'main');
+  await run('git', ['add', '.'], { cwd: repositoryRoot });
+  await run('git', ['commit', '-m', 'Main'], { cwd: repositoryRoot });
+  await run('git', ['merge', '--no-ff', 'feature', '-m', 'Merge feature'], { cwd: repositoryRoot });
+
+  assert.ok((await readHeadCommit(repositoryRoot)).files.includes('feature.txt'));
+});

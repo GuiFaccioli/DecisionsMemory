@@ -2,6 +2,13 @@
   "name": "decisionsmemory",
   "version": "0.1.0",
   "type": "module",
+  "files": [
+    "bin",
+    "src",
+    "schemas",
+    "README.md",
+    "LICENSE"
+  ],
   "engines": { "node": ">=20" },
   "bin": { "decisionsmemory": "bin/decisionsmemory.js" },
   "scripts": {

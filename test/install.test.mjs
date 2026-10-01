@@ -63,3 +63,13 @@ test('installed hook runs the real CLI and creates one Journal commit', async ()
   const { stdout: generated } = await run('git', ['show', '--format=', '--name-only', 'HEAD'], { cwd: root });
   assert.match(generated, /docs\/dev-journal\/entries/);
 });
+
+test('installHook creates a configured hooks directory when it does not exist', async () => {
+  const root = await repository();
+  await run('git', ['config', 'core.hooksPath', '.decisionsmemory-hooks'], { cwd: root });
+
+  const result = await installHook({ repositoryRoot: root, packageRoot: '/package' });
+
+  assert.equal(result.status, 'installed');
+  assert.match(await readFile(join(root, '.decisionsmemory-hooks', 'post-commit'), 'utf8'), /DecisionsMemory managed hook/);
+});

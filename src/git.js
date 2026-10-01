@@ -11,10 +11,10 @@ export async function git(repositoryRoot, args) {
 export async function readHeadCommit(repositoryRoot) {
   const [metadata, files] = await Promise.all([
     git(repositoryRoot, ['show', '-s', '--format=%H%x00%cs%x00%s', 'HEAD']),
-    git(repositoryRoot, ['diff-tree', '--root', '--no-commit-id', '--name-only', '-r', 'HEAD']),
+    git(repositoryRoot, ['diff-tree', '--root', '-m', '--no-commit-id', '--name-only', '-r', 'HEAD']),
   ]);
   const [hash, date, subject] = metadata.trim().split('\0');
-  return { hash, date, subject, files: files.trim() ? files.trim().split(/\r?\n/) : [] };
+  return { hash, date, subject, files: files.trim() ? [...new Set(files.trim().split(/\r?\n/))] : [] };
 }
 
 export async function hasDirtyJournal(repositoryRoot, journalDirectory) {
