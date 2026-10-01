@@ -7,13 +7,13 @@ project whose technical history it documents.
 ## Install
 
 ```sh
-npm install -D decisionsmemory
+npx decisionsmemory init
 ```
 
-The install script configures a chained `post-commit` hook when run inside a
-Git repository. Existing `post-commit` hooks are preserved. Outside a Git
-repository the package installs normally and reports that the hook was
-skipped.
+This installs `decisionsmemory` in `devDependencies` and configures a chained
+`post-commit` hook in the current Git repository. Existing `post-commit` hooks
+are preserved. This explicit command works with npm 12+, where install scripts
+are disabled by default.
 
 The hook uses locally authenticated Codex with Luna and low reasoning effort.
 Install and authenticate Codex before making commits.
