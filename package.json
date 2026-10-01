@@ -5,5 +5,8 @@
   "type": "module",
   "engines": { "node": ">=20" },
   "bin": { "decisionsmemory": "bin/decisionsmemory.js" },
-  "scripts": { "test": "node --test test/*.test.mjs" }
+  "scripts": {
+    "postinstall": "node ./bin/decisionsmemory.js install",
+    "test": "node --test test/*.test.mjs"
+  }
 }

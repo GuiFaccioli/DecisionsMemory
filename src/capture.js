@@ -1,5 +1,6 @@
-import { hasDirtyJournal, readHeadCommit } from './git.js';
+import { git, hasDirtyJournal, readHeadCommit } from './git.js';
 import { writeJournalRecord } from './journal.js';
+import { relative } from 'node:path';
 
 const generatedPrefix = 'chore(decisionsmemory):';
 
@@ -17,4 +18,17 @@ export async function captureHeadCommit({ repositoryRoot, config, executor }) {
   } catch (error) {
     return { status: 'warning', message: error.message };
   }
+}
+
+export async function commitJournalFiles({ repositoryRoot, journal, sourceCommit }) {
+  const paths = journal.generatedFiles.map((file) => relative(repositoryRoot, file));
+  await git(repositoryRoot, ['add', '--', ...paths]);
+  await git(repositoryRoot, ['commit', '-m', `${generatedPrefix} record ${sourceCommit.hash.slice(0, 7)}`]);
+}
+
+export async function runPostCommit({ repositoryRoot, config, executor }) {
+  const result = await captureHeadCommit({ repositoryRoot, config, executor });
+  if (result.status !== 'captured') return result;
+  await commitJournalFiles({ repositoryRoot, journal: result.journal, sourceCommit: result.commit });
+  return result;
 }
