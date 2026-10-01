@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { mkdtemp, readFile, stat } from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile, stat, symlink, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import test from 'node:test';
@@ -58,4 +58,32 @@ test('global HTML index preserves commit subjects containing brackets', async ()
 
   const page = await readFile(join(repositoryRoot, 'docs/dev-journal/index.html'), 'utf8');
   assert.match(page, /feat: add \[admin\]/);
+});
+
+test('writeJournalRecord rejects an existing Journal symlink outside the repository', async () => {
+  const repositoryRoot = await mkdtemp(join(tmpdir(), 'decisionsmemory-journal-'));
+  const outside = await mkdtemp(join(tmpdir(), 'decisionsmemory-outside-'));
+  await mkdir(join(repositoryRoot, 'docs'));
+  await symlink(outside, join(repositoryRoot, 'docs', 'dev-journal'), 'junction');
+
+  await assert.rejects(
+    writeJournalRecord({ repositoryRoot, config, commit: { hash: 'aaaaaaa', subject: 'Ajuste', date: '2026-09-30' }, entries: [] }),
+    /outside the repository/,
+  );
+});
+
+test('writeJournalRecord rejects an internal Journal index symlink outside the repository', async () => {
+  const repositoryRoot = await mkdtemp(join(tmpdir(), 'decisionsmemory-journal-'));
+  const outside = await mkdtemp(join(tmpdir(), 'decisionsmemory-outside-'));
+  const journalRoot = join(repositoryRoot, 'docs', 'dev-journal');
+  const sentinel = join(outside, 'do-not-overwrite.md');
+  await writeFile(sentinel, 'do not overwrite');
+  await mkdir(journalRoot, { recursive: true });
+  await symlink(outside, join(journalRoot, 'index.md'), 'junction');
+
+  await assert.rejects(
+    writeJournalRecord({ repositoryRoot, config, commit: { hash: 'aaaaaaa', subject: 'Ajuste', date: '2026-09-30' }, entries: [] }),
+    /outside the repository/,
+  );
+  assert.equal(await readFile(sentinel, 'utf8'), 'do not overwrite');
 });

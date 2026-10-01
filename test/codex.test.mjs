@@ -35,7 +35,7 @@ test('runCodexCapture rejects entries with invalid field types', async () => {
   );
 });
 
-test('buildWindowsCommand preserves arguments containing spaces', () => {
-  const command = buildWindowsCommand('codex', ['exec', '--output-schema', 'C:/My Project/schema.json', '-']);
-  assert.match(command, /"C:\/My Project\/schema.json"/);
+test('buildWindowsCommand preserves spaces and literal percent signs', () => {
+  const command = buildWindowsCommand('codex', ['exec', '--output-schema', 'C:/My Project/%PROBE%/schema.json', '-']);
+  assert.match(command, /"C:\/My Project\/"\^%"PROBE"\^%"\/schema.json"/);
 });

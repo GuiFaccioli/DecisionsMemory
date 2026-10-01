@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url';
 const outputSchema = fileURLToPath(new URL('../schemas/capture-result.schema.json', import.meta.url));
 
 export function buildWindowsCommand(command, args) {
-  const quote = (value) => `"${String(value).replaceAll('%', '%%').replaceAll('"', '""')}"`;
+  const quote = (value) => `"${String(value).replaceAll('"', '""').replaceAll('%', '"^%"')}"`;
   return [command, ...args].map(quote).join(' ');
 }
 
