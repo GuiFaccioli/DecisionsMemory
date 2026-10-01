@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { chmod, mkdtemp, mkdir, readFile, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { delimiter, join } from 'node:path';
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import test from 'node:test';
@@ -49,13 +49,16 @@ test('installed hook runs the real CLI and creates one Journal commit', async ()
   const root = await repository();
   const fakeBin = await mkdtemp(join(tmpdir(), 'decisionsmemory-codex-'));
   await writeFile(join(fakeBin, 'codex.cmd'), '@echo {"entries":[{"title":"Entrada","summary":"Resumo","files":[],"impact":"Impacto"}]}\r\n');
+  const posixCodex = join(fakeBin, 'codex');
+  await writeFile(posixCodex, '#!/bin/sh\nprintf \'{"entries":[{"title":"Entrada","summary":"Resumo","files":[],"impact":"Impacto"}]}\\n\'\n');
+  await chmod(posixCodex, 0o755);
   await run('git', ['config', 'user.email', 'test@example.com'], { cwd: root });
   await run('git', ['config', 'user.name', 'Test'], { cwd: root });
   await installHook({ repositoryRoot: root, packageRoot: process.cwd() });
 
   await run('git', ['commit', '--allow-empty', '-m', 'Mudança real'], {
     cwd: root,
-    env: { ...process.env, PATH: `${fakeBin};${process.env.PATH}` },
+    env: { ...process.env, PATH: `${fakeBin}${delimiter}${process.env.PATH}` },
   });
 
   const { stdout: subjects } = await run('git', ['log', '--format=%s', '-2'], { cwd: root });
