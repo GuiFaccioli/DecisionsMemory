@@ -1,27 +1,79 @@
 # DecisionsMemory
 
-DecisionsMemory records each new Git commit as AI-readable Markdown plus a
-local HTML/CSS page. It is an npm development dependency: it lives with the
-project whose technical history it documents.
+**DecisionsMemory transforma cada commit do Git em uma memória técnica do projeto.**
 
-## Install
+Ele cria Markdown legível por IA e páginas HTML/CSS para pessoas, mantendo um diário de mudanças junto do código. É uma ferramenta de desenvolvimento: roda no repositório local e não vai para produção.
+
+## Instalação rápida
 
 ```sh
 npx decisionsmemory init
 ```
 
-This installs `decisionsmemory` in `devDependencies` and configures a chained
-`post-commit` hook in the current Git repository. Existing `post-commit` hooks
-are preserved. This explicit command works with npm 12+, where install scripts
-are disabled by default.
+Esse único comando adiciona `decisionsmemory` em `devDependencies`, configura
+um hook `post-commit` local e preserva qualquer hook existente. O fluxo não
+depende de `postinstall`, portanto funciona com npm 12+.
 
-The hook uses locally authenticated Codex with Luna and low reasoning effort.
-Install and authenticate Codex before making commits.
+## Para que serve
 
-## Configuration
+Use quando quiser que o histórico responda claramente:
 
-Create `decisionsmemory.json` at the repository root to override non-secret
-settings:
+- o que mudou em cada commit;
+- quais arquivos foram envolvidos;
+- qual foi o impacto técnico;
+- onde encontrar uma mudança anterior.
+
+Isso permite que uma IA retome contexto e que pessoas naveguem alterações sem
+depender somente de mensagens curtas de commit ou de diffs antigos.
+
+## O que vem no pacote
+
+O pacote contém somente o necessário para usá-lo:
+
+- o comando `decisionsmemory` / `npx decisionsmemory`;
+- o instalador do hook Git;
+- a captura segura de metadados do commit;
+- a integração com Codex para resumir mudanças;
+- os geradores de Markdown, HTML e CSS do Journal.
+
+Arquivos de desenvolvimento deste repositório — como `superpowers`, planos,
+testes internos e ADRs — **não** são enviados pelo npm.
+
+## Pré-requisitos
+
+- Node.js 20 ou superior;
+- Git;
+- Codex CLI instalado e autenticado na máquina.
+
+Por padrão, o pacote usa Codex com modelo Luna e esforço de raciocínio baixo.
+
+## O que é criado
+
+Depois de um commit, o Journal terá esta estrutura:
+
+```text
+docs/dev-journal/
+├── index.md
+├── index.html
+└── entries/
+    └── 2026-10-01-corrige-login-a1b2c3d/
+        ├── entry1.md
+        ├── index.html
+        └── styles.css
+```
+
+- `entryN.md` é a fonte canônica, fácil para IA ler.
+- `index.html` e `styles.css` são a visão visual daquela mudança.
+- A numeração dos `entryN` continua globalmente entre todas as pastas.
+- Os dois arquivos `index` na raiz são o índice geral do Journal.
+
+O pacote cria um commit `chore(decisionsmemory): ...` para o Journal e ignora
+esse próprio commit, evitando recursão.
+
+## Configuração opcional
+
+Crie `decisionsmemory.json` na raiz do repositório para alterar opções não
+secretas:
 
 ```json
 {
@@ -34,27 +86,25 @@ settings:
 }
 ```
 
-Credentials belong in the Codex environment, never in this file.
+Credenciais ficam no ambiente do Codex, nunca neste arquivo.
 
-## Output
+## Comandos úteis
 
-Each ordinary commit creates a directory such as
-`docs/dev-journal/entries/2026-09-30-corrige-login/`. It contains globally
-numbered `entryN.md` files, `index.html`, and `styles.css`. The Journal root
-also has `index.md` and `index.html`.
+```sh
+npx decisionsmemory status
+```
 
-DecisionsMemory creates a separate commit beginning with
-`chore(decisionsmemory):`; the hook skips that commit to prevent recursion.
+Mostra se a pasta atual é um repositório Git, se a configuração é válida e se o hook está instalado.
 
-## Safety and limits
+```sh
+npx decisionsmemory install
+```
 
-- Full diffs and credentials are not saved.
-- If Codex fails, the original commit remains valid and a warning is printed.
-- If `docs/dev-journal/` has uncommitted changes, generation is skipped rather
-  than mixing or overwriting your work.
-- Existing history is not imported on installation.
-- Retries, hosted publishing, and provider-specific UI integrations are not in
-  V1.
+Reinstala somente o hook quando o pacote já está no `node_modules`.
 
-Run `npx decisionsmemory status` to check whether the current directory is a
-Git repository.
+## Limites e segurança
+
+- Diffs completos e credenciais não são salvos.
+- Se o Codex falhar, o commit original permanece válido e um aviso é mostrado.
+- Se o Journal estiver sujo, a geração é ignorada para não misturar conteúdo manual e gerado.
+- Histórico anterior à instalação não é importado.
