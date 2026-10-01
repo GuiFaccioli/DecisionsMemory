@@ -87,3 +87,16 @@ test('writeJournalRecord rejects an internal Journal index symlink outside the r
   );
   assert.equal(await readFile(sentinel, 'utf8'), 'do not overwrite');
 });
+
+test('writeJournalRecord rejects a dangling internal Journal link', async () => {
+  const repositoryRoot = await mkdtemp(join(tmpdir(), 'decisionsmemory-journal-'));
+  const outside = await mkdtemp(join(tmpdir(), 'decisionsmemory-outside-'));
+  const journalRoot = join(repositoryRoot, 'docs', 'dev-journal');
+  await mkdir(journalRoot, { recursive: true });
+  await symlink(join(outside, 'missing-index.md'), join(journalRoot, 'index.md'), 'junction');
+
+  await assert.rejects(
+    writeJournalRecord({ repositoryRoot, config, commit: { hash: 'aaaaaaa', subject: 'Ajuste', date: '2026-09-30' }, entries: [] }),
+    /Journal path/,
+  );
+});

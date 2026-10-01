@@ -1,4 +1,4 @@
-import { mkdir, readFile, readdir, realpath, writeFile } from 'node:fs/promises';
+import { lstat, mkdir, readFile, readdir, realpath, writeFile } from 'node:fs/promises';
 import { basename, join, relative } from 'node:path';
 import { isPathInside } from './config.js';
 
@@ -26,6 +26,13 @@ async function assertJournalInsideRepository(repositoryRoot, journalRoot) {
   for (const segment of relative(repositoryRoot, journalRoot).split(/[\\/]+/)) {
     ancestor = join(ancestor, segment);
     try {
+      const stats = await lstat(ancestor);
+      if (stats.isSymbolicLink()) {
+        try { await realpath(ancestor); } catch (error) {
+          if (error.code === 'ENOENT') throw new Error('Journal path contains a dangling symbolic link');
+          throw error;
+        }
+      }
       const resolvedAncestor = await realpath(ancestor);
       if (!isPathInside(realRoot, resolvedAncestor)) throw new Error('Journal path points outside the repository');
     } catch (error) {
