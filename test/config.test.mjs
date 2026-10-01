@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { mkdtemp, writeFile } from 'node:fs/promises';
+import { mkdtemp, symlink, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import test from 'node:test';
@@ -56,4 +56,13 @@ test('loadConfig rejects shell syntax in executor settings', async () => {
   );
 
   await assert.rejects(loadConfig(repositoryRoot), /safe executable token/);
+});
+
+test('loadConfig rejects a Journal path traversing a symlink', async () => {
+  const repositoryRoot = await mkdtemp(join(tmpdir(), 'decisionsmemory-config-'));
+  const outside = await mkdtemp(join(tmpdir(), 'decisionsmemory-outside-'));
+  await symlink(outside, join(repositoryRoot, 'linked'), 'junction');
+  await writeFile(join(repositoryRoot, 'decisionsmemory.json'), JSON.stringify({ journalDirectory: 'linked/journal' }));
+
+  await assert.rejects(loadConfig(repositoryRoot), /must not traverse a symlink/);
 });

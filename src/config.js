@@ -1,4 +1,4 @@
-import { readFile } from 'node:fs/promises';
+import { readFile, realpath } from 'node:fs/promises';
 import { isAbsolute, relative, resolve } from 'node:path';
 
 const defaults = {
@@ -34,6 +34,20 @@ export async function loadConfig(repositoryRoot) {
   const journalPath = resolve(repositoryRoot, config.journalDirectory);
   if (isAbsolute(config.journalDirectory) || relative(repositoryRoot, journalPath).startsWith('..')) {
     throw new Error('journalDirectory must stay inside the repository');
+  }
+  const realRoot = await realpath(repositoryRoot);
+  let ancestor = realRoot;
+  for (const segment of config.journalDirectory.split(/[\\/]+/)) {
+    ancestor = resolve(ancestor, segment);
+    try {
+      const resolvedAncestor = await realpath(ancestor);
+      if (relative(realRoot, resolvedAncestor).startsWith('..')) {
+        throw new Error('journalDirectory must not traverse a symlink');
+      }
+    } catch (error) {
+      if (error.code === 'ENOENT') break;
+      throw error;
+    }
   }
   return config;
 }

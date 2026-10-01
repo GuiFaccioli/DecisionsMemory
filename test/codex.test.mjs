@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { runCodexCapture } from '../src/codex.js';
+import { buildWindowsCommand, runCodexCapture } from '../src/codex.js';
 
 test('runCodexCapture invokes configured Codex with low reasoning and parses entries', async () => {
   let invocation;
@@ -33,4 +33,9 @@ test('runCodexCapture rejects entries with invalid field types', async () => {
     }),
     /invalid entries/,
   );
+});
+
+test('buildWindowsCommand preserves arguments containing spaces', () => {
+  const command = buildWindowsCommand('codex', ['exec', '--output-schema', 'C:/My Project/schema.json', '-']);
+  assert.match(command, /"C:\/My Project\/schema.json"/);
 });

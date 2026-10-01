@@ -3,9 +3,15 @@ import { fileURLToPath } from 'node:url';
 
 const outputSchema = fileURLToPath(new URL('../schemas/capture-result.schema.json', import.meta.url));
 
+export function buildWindowsCommand(command, args) {
+  const quote = (value) => `"${String(value).replaceAll('%', '%%').replaceAll('"', '""')}"`;
+  return [command, ...args].map(quote).join(' ');
+}
+
 function invoke(command, args, { cwd, input, shell }) {
   return new Promise((resolve, reject) => {
-    const child = spawn(command, args, { cwd, shell, stdio: ['pipe', 'pipe', 'pipe'] });
+    const executable = shell ? buildWindowsCommand(command, args) : command;
+    const child = spawn(executable, shell ? [] : args, { cwd, shell, stdio: ['pipe', 'pipe', 'pipe'] });
     let stdout = '';
     let stderr = '';
     child.stdout.on('data', (data) => { stdout += data; });
